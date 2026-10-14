@@ -709,6 +709,15 @@ jobs:
         working-directory: ${{ env.KERNEL_ROOT }}
         run: bash "$GITHUB_WORKSPACE/scripts/sukisu_compat/apply.sh" KernelSU
 
+      - name: 修复 5.10.230+ 内核 track_throne 宏命名兼容问题
+        if: inputs.ksu_variant == 'SukiSU' && inputs.kernel_version == '5.10'
+        working-directory: ${{ env.KERNEL_ROOT }}
+        run: |
+          SUB_LEVEL_NUM="${{ inputs.sub_level }}"
+          if [[ "$SUB_LEVEL_NUM" =~ ^[0-9]+$ ]] && [ "$SUB_LEVEL_NUM" -ge 230 ]; then
+            sed -i 's/TRACK_THRONE_FORCE_SYNCHRONOUS/PROBE_FORCE_SYNCHRONOUS/g' common/drivers/kernelsu/manager/pkg_observer.c
+          fi
+
       - name: 应用 SUSFS 补丁
         if: inputs.enable_susfs
         working-directory: ${{ env.KERNEL_ROOT }}
